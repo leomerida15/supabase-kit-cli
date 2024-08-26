@@ -37,7 +37,6 @@ export const cpCommon = () => {
 	if (!existsCommondPath) return console.log("No common folder found");
 
 	edgesPaths.map((funcsPath, i) => {
-		console.log("i", i);
 		const commonPathInfunc = join(funcsPath, "common");
 
 		copyDirRecursive(commondPath, commonPathInfunc);

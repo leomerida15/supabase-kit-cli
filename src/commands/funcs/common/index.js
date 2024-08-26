@@ -12,7 +12,7 @@ const { input, showHelp } = cli;
 export async function CommonFuncs() {
 	input.includes("help") && showHelp(0);
 
-	if (input.includes("dev")) return cpCommon();
+	if (input.includes("copy")) return cpCommon();
 
 	if (input.includes("serve"))
 		return nodemon({
@@ -25,7 +25,7 @@ export async function CommonFuncs() {
 				"commands",
 				"funcs",
 				"common",
-				"cpCommon.js",
+				"onCpCommon.js",
 			),
 			ext: "ts,js", // Especificar extensiones a monitorear
 			verbose: true,

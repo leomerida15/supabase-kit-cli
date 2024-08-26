@@ -1,6 +1,6 @@
 {
 	"name": "@supabase-kit/cli",
-	"version": "0.0.34-alpha",
+	"version": "0.0.35-alpha",
 	"author": {
 		"name": "Dimas Leopoldo Mérida Flores - gh: leomerida15",
 		"email": "dimasmerida15@gmail.com",
@@ -44,6 +44,11 @@
 	"Collaborators": [
 		"luismera86"
 	],
+	"homepage": "https://leomerida15.github.io/next-rocket-kit/",
+  	"repository": {
+    "type": "git",
+    "url": "https://github.com/leomerida15/supabase-kit-cli"
+  	},
 	"type": "module",
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3"
