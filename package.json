@@ -1,0 +1,45 @@
+{
+	"name": "@supabase-kit/cli",
+	"version": "0.0.31-alpha",
+	"author": {
+		"name": "Dimas Leopoldo Mérida Flores - gh: leomerida15",
+		"email": "dimasmerida15@gmail.com",
+		"url": "https://github.com/leomerida15"
+	},
+	"dependencies": {
+		"chalk": "^5.3.0",
+		"cli-alerts": "^2.0.0",
+		"cli-handle-error": "^4.4.0",
+		"cli-handle-unhandled": "^1.1.1",
+		"cli-meow-help": "^4.0.0",
+		"cli-welcome": "^3.0.0",
+		"get-package-json-file": "^2.0.0",
+		"meow": "^13.2.0",
+		"nodemon": "^3.1.4"
+	},
+	"contributors": [
+		"luismera86"
+	],
+	"bin": {
+		"supa": "index.js"
+	},
+	"description": "cli for creating a simple wrapper with which to manage suapbase projects using code.",
+	"files": [
+		"index.js",
+		"src"
+	],
+	"main": "index.js",
+	"keywords": [
+		"cli",
+		"Dimas Leopoldo Mérida Flores - gh: leomerida15"
+	],
+	"license": "MIT",
+	"scripts": {
+		"start": "node index.js",
+		"Up": "npm publish --access public"
+	},
+	"type": "module",
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3"
+	}
+}
