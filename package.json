@@ -1,6 +1,6 @@
 {
 	"name": "@supabase-kit/cli",
-	"version": "0.0.33-alpha",
+	"version": "0.0.34-alpha",
 	"author": {
 		"name": "Dimas Leopoldo Mérida Flores - gh: leomerida15",
 		"email": "dimasmerida15@gmail.com",
@@ -31,13 +31,19 @@
 	"main": "index.js",
 	"keywords": [
 		"cli",
-		"Dimas Leopoldo Mérida Flores - gh: leomerida15"
+		"supabase",
+		"wrapper",
+		"framework",
+		"edge functions"
 	],
 	"license": "MIT",
 	"scripts": {
 		"start": "node index.js",
 		"Up": "npm publish --access public"
 	},
+	"Collaborators": [
+		"luismera86"
+	],
 	"type": "module",
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3"
