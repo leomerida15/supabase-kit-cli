@@ -1,5 +1,5 @@
 {
-    "name": "cli",
+    "name": "@supabase-kit/cli",
     "version": "0.0.51-alpha",
     "license": "MIT",
     "type": "module",
