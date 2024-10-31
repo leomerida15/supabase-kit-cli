@@ -41,7 +41,6 @@
     "jest": {
         "testEnvironment": "node"
     },
-    "peerDependencies": {},
     "engines": {
         "node": ">=16"
     },
@@ -55,20 +54,25 @@
             "limit": "10 KB"
         }
     ],
+    "prettier": {
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "all",
+        "printWidth": 100,
+        "useTabs": false,
+        "endOfLine": "auto"
+    },
     "devDependencies": {
         "@size-limit/preset-small-lib": "^11.1.4",
         "@tsconfig/recommended": "^1.0.7",
         "@types/bun": "^1.1.8",
         "@types/shelljs": "^0.8.15",
         "dts-cli": "^2.0.5",
-        "eslint": "^9.13.0",
         "husky": "^9.1.5",
-        "prettier": "^3.3.3",
-        "prisma-import": "^1.0.5",
         "size-limit": "^11.1.4",
-        "supabase": "^1.207.9",
         "tslib": "^2.7.0",
-        "typescript": "^5.5.4"
+        "typescript": "^5.1.6"
     },
     "dependencies": {
         "commander": "^12.1.0",
