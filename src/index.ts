@@ -7,7 +7,7 @@ const pkgJson = getPackageJson('./../package.json');
 
 const program = new Command();
 
-program.name(pkgJson.name).description('CLI to use @supabase-kit').version(pkgJson.version);
+program.name('supa').description('CLI to use @supabase-kit').version(pkgJson.version);
 
 InitCommand(program);
 
