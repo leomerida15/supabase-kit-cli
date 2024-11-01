@@ -1,8 +1,7 @@
 {
     "name": "@supabase-kit/cli",
-    "version": "0.0.69-alpha",
+    "version": "0.0.71-alpha",
     "license": "MIT",
-    "type": "module",
     "author": {
         "name": "leomerida15",
         "email": "dimasmerida15@gmail.com",
