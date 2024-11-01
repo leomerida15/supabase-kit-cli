@@ -16,3 +16,5 @@ InitCommand(program);
 MigrateCommand(program);
 
 program.parse();
+
+process.exit(0);
