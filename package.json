@@ -1,7 +1,8 @@
 {
     "name": "@supabase-kit/cli",
-    "version": "0.0.71-alpha",
+    "version": "0.0.75-alpha",
     "license": "MIT",
+    "type": "module",
     "author": {
         "name": "leomerida15",
         "email": "dimasmerida15@gmail.com",
@@ -19,11 +20,12 @@
         "url": "https://github.com/leomerida15/supabase-kit-cli"
     },
     "bin": {
-        "supa": "dist/index.js"
+        "supa": "dist/cli.esm.js"
     },
     "scripts": {
         "analyze": "size-limit --why",
         "build": "dts build",
+        "postbuild": "bun add-shebang.js",
         "lint": "dts lint",
         "prepare": "dts build",
         "size": "size-limit",
