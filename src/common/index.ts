@@ -1,1 +1,1 @@
-export * from "./getPkJosn";
+export * from './getPkJosn';
