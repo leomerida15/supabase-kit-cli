@@ -1,6 +1,6 @@
 {
     "name": "@supabase-kit/cli",
-    "version": "0.0.66-alpha",
+    "version": "0.0.68-alpha",
     "license": "MIT",
     "type": "module",
     "author": {
