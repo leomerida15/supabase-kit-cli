@@ -1,6 +1,6 @@
 {
     "name": "@supabase-kit/cli",
-    "version": "0.0.65-alpha",
+    "version": "0.0.66-alpha",
     "license": "MIT",
     "type": "module",
     "author": {
@@ -25,6 +25,7 @@
     "scripts": {
         "analyze": "size-limit --why",
         "build": "dts build",
+        "postbuild": "echo '#!/usr/bin/env node' | cat - dist/index.js > temp && mv temp dist/index.js",
         "lint": "dts lint",
         "prepare": "dts build",
         "size": "size-limit",

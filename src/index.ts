@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander';
 import { getPackageJson } from './common';
 import { InitCommand } from './commands/init';
