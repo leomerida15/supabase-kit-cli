@@ -1,6 +1,6 @@
 {
     "name": "@supabase-kit/cli",
-    "version": "0.0.51-alpha",
+    "version": "0.0.65-alpha",
     "license": "MIT",
     "type": "module",
     "author": {
@@ -12,8 +12,7 @@
     "module": "dist/cli.esm.js",
     "typings": "dist/index.d.ts",
     "files": [
-        "dist",
-        "src"
+        "dist"
     ],
     "homepage": "https://github.com/leomerida15/supabase-kit-cli",
     "repository": {
