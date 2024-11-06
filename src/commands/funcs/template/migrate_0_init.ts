@@ -1,44 +1,45 @@
--- CreateSchema
+export const migrate_0_init = `-- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "auth";
 
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 
+-- CreateEnum
+-- Verificar y crear el tipo ENUM si no existe
 DO $$
 BEGIN
-    -- Verifica y crea el tipo aal_level si no existe
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'aal_level') THEN
         CREATE TYPE "auth"."aal_level" AS ENUM ('aal1', 'aal2', 'aal3');
     END IF;
+END $$;
 
-    -- Verifica y crea el tipo code_challenge_method si no existe
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'code_challenge_method') THEN
         CREATE TYPE "auth"."code_challenge_method" AS ENUM ('s256', 'plain');
     END IF;
+END $$;
 
-    -- Verifica y crea el tipo factor_status si no existe
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'factor_status') THEN
         CREATE TYPE "auth"."factor_status" AS ENUM ('unverified', 'verified');
     END IF;
+END $$;
 
-    -- Verifica y crea el tipo factor_type si no existe
+DO $$
+BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'factor_type') THEN
         CREATE TYPE "auth"."factor_type" AS ENUM ('totp', 'webauthn', 'phone');
     END IF;
-
-    -- Verifica y crea el tipo one_time_token_type si no existe
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'one_time_token_type') THEN
-        CREATE TYPE "auth"."one_time_token_type" AS ENUM (
-            'confirmation_token',
-            'reauthentication_token',
-            'recovery_token',
-            'email_change_token_new',
-            'email_change_token_current',
-            'phone_change_token'
-        );
-    END IF;
 END $$;
 
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'one_time_token_type') THEN
+        CREATE TYPE "auth"."one_time_token_type" AS ENUM ('confirmation_token', 'reauthentication_token', 'recovery_token', 'email_change_token_new', 'email_change_token_current', 'phone_change_token');
+    END IF;
+END $$;
 
 -- CreateTable
 CREATE TABLE IF NOT EXISTS "auth"."audit_log_entries" (
@@ -196,17 +197,14 @@ CREATE TABLE IF NOT EXISTS "auth"."saml_relay_states" (
 
 -- CreateTable
 CREATE TABLE IF NOT EXISTS "auth"."schema_migrations" (
-    "version" VARCHAR(14) NOT NULL,
+    "version" TEXT NOT NULL,
 
-    CONSTRAINT "schema_migrations_pkey" PRIMARY KEY ("version")
+    CONSTRAINT "schema_migrations_pkey" PRIMARY KEY ("version"),
+    constraint "version_max_length" check ((length("version") <= 255))
 );
 
-ALTER TABLE "auth"."schema_migrations" ALTER COLUMN version TYPE character varying(14);
-
-CREATE UNIQUE INDEX "schema_migrations_version_key" ON "auth"."schema_migrations"("version");
-
 -- CreateTable
-CREATE TABLE IF NOT EXISTS  "auth"."sessions" (
+CREATE TABLE IF NOT EXISTS "auth"."sessions" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
     "created_at" TIMESTAMPTZ(6),
@@ -271,7 +269,7 @@ CREATE TABLE IF NOT EXISTS "auth"."users" (
     "phone_change" TEXT DEFAULT '',
     "phone_change_token" VARCHAR(255) DEFAULT '',
     "phone_change_sent_at" TIMESTAMPTZ(6),
-    "confirmed_at" TIMESTAMP WITH TIME zone generated always as (least(email_confirmed_at, phone_confirmed_at)) stored null,
+    "confirmed_at" TIMESTAMPTZ(6) GENERATED ALWAYS AS (LEAST(email_confirmed_at, phone_confirmed_at)) STORED,
     "email_change_token_current" VARCHAR(255) DEFAULT '',
     "email_change_confirm_status" SMALLINT DEFAULT 0,
     "banned_until" TIMESTAMPTZ(6),
@@ -366,6 +364,9 @@ CREATE INDEX IF NOT EXISTS "saml_relay_states_for_email_idx" ON "auth"."saml_rel
 CREATE INDEX IF NOT EXISTS "saml_relay_states_sso_provider_id_idx" ON "auth"."saml_relay_states"("sso_provider_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX IF NOT EXISTS "schema_migrations_version_key" ON "auth"."schema_migrations"("version");
+
+-- CreateIndex
 CREATE INDEX IF NOT EXISTS "sessions_not_after_idx" ON "auth"."sessions"("not_after" DESC);
 
 -- CreateIndex
@@ -385,127 +386,38 @@ CREATE INDEX IF NOT EXISTS "users_instance_id_idx" ON "auth"."users"("instance_i
 
 -- CreateIndex
 CREATE INDEX IF NOT EXISTS "users_is_anonymous_idx" ON "auth"."users"("is_anonymous");
-DO $$
-BEGIN
-    -- Agrega la clave foránea identities_user_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'identities_user_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."identities"
-        ADD CONSTRAINT "identities_user_id_fkey"
-        FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
 
-    -- Agrega la clave foránea mfa_amr_claims_session_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'mfa_amr_claims_session_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."mfa_amr_claims"
-        ADD CONSTRAINT "mfa_amr_claims_session_id_fkey"
-        FOREIGN KEY ("session_id") REFERENCES "auth"."sessions"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."identities" ADD CONSTRAINT "identities_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea mfa_challenges_auth_factor_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'mfa_challenges_auth_factor_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."mfa_challenges"
-        ADD CONSTRAINT "mfa_challenges_auth_factor_id_fkey"
-        FOREIGN KEY ("factor_id") REFERENCES "auth"."mfa_factors"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."mfa_amr_claims" ADD CONSTRAINT "mfa_amr_claims_session_id_fkey" FOREIGN KEY ("session_id") REFERENCES "auth"."sessions"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea mfa_factors_user_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'mfa_factors_user_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."mfa_factors"
-        ADD CONSTRAINT "mfa_factors_user_id_fkey"
-        FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."mfa_challenges" ADD CONSTRAINT "mfa_challenges_auth_factor_id_fkey" FOREIGN KEY ("factor_id") REFERENCES "auth"."mfa_factors"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea one_time_tokens_user_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'one_time_tokens_user_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."one_time_tokens"
-        ADD CONSTRAINT "one_time_tokens_user_id_fkey"
-        FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."mfa_factors" ADD CONSTRAINT "mfa_factors_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea refresh_tokens_session_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'refresh_tokens_session_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."refresh_tokens"
-        ADD CONSTRAINT "refresh_tokens_session_id_fkey"
-        FOREIGN KEY ("session_id") REFERENCES "auth"."sessions"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."one_time_tokens" ADD CONSTRAINT "one_time_tokens_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea saml_providers_sso_provider_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'saml_providers_sso_provider_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."saml_providers"
-        ADD CONSTRAINT "saml_providers_sso_provider_id_fkey"
-        FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."refresh_tokens" ADD CONSTRAINT "refresh_tokens_session_id_fkey" FOREIGN KEY ("session_id") REFERENCES "auth"."sessions"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea saml_relay_states_flow_state_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'saml_relay_states_flow_state_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."saml_relay_states"
-        ADD CONSTRAINT "saml_relay_states_flow_state_id_fkey"
-        FOREIGN KEY ("flow_state_id") REFERENCES "auth"."flow_state"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."saml_providers" ADD CONSTRAINT "saml_providers_sso_provider_id_fkey" FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea saml_relay_states_sso_provider_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'saml_relay_states_sso_provider_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."saml_relay_states"
-        ADD CONSTRAINT "saml_relay_states_sso_provider_id_fkey"
-        FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."saml_relay_states" ADD CONSTRAINT "saml_relay_states_flow_state_id_fkey" FOREIGN KEY ("flow_state_id") REFERENCES "auth"."flow_state"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea sessions_user_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'sessions_user_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."sessions"
-        ADD CONSTRAINT "sessions_user_id_fkey"
-        FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."saml_relay_states" ADD CONSTRAINT "saml_relay_states_sso_provider_id_fkey" FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-    -- Agrega la clave foránea sso_domains_sso_provider_id_fkey solo si no existe
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'sso_domains_sso_provider_id_fkey' AND connamespace = 'auth'::regnamespace
-    ) THEN
-        ALTER TABLE "auth"."sso_domains"
-        ADD CONSTRAINT "sso_domains_sso_provider_id_fkey"
-        FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id")
-        ON DELETE CASCADE ON UPDATE NO ACTION;
-    END IF;
+-- AddForeignKey
+ALTER TABLE "auth"."sessions" ADD CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
-END $$;
+-- AddForeignKey
+ALTER TABLE "auth"."sso_domains" ADD CONSTRAINT "sso_domains_sso_provider_id_fkey" FOREIGN KEY ("sso_provider_id") REFERENCES "auth"."sso_providers"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+`;

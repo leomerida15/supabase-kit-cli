@@ -7,24 +7,47 @@
  */
 
 import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-export function getPackageJson(customPath = './package.json') {
-    const err = new Error().stack as string;
+export class PackageJson {
+    static get(customPath?: string) {
+        const packagePath = customPath || resolve('package.json');
+        try {
+            const packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));
+            return packageJson;
+        } catch (error) {
+            console.error(`Error reading package.json from ${packagePath}:`, error);
+            throw error;
+        }
+    }
 
-    // Get the caller's file path
-    const callerFile = ((err.split('\n')[2] ?? '').match(/\((.*):\d+:\d+\)/) ?? '')[1];
+    static set(data: Record<string, any>, customPath?: string) {
+        const packagePath = customPath || resolve('package.json');
+        try {
+            writeFileSync(packagePath, JSON.stringify(data, null, 2), 'utf-8');
+        } catch (error) {
+            console.error(`Error reading package.json from ${packagePath}:`, error);
+            throw error;
+        }
+    }
+}
 
-    // Convert file URL to path if necessary
-    const callerPath = callerFile.startsWith('file:') ? fileURLToPath(callerFile) : callerFile;
-
-    const callerDir = dirname(callerPath);
-
-    const packagePath = join(callerDir, customPath);
+export function getPackageJson(customPath?: string) {
+    const packagePath = customPath || resolve('package.json');
     try {
         const packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));
         return packageJson;
+    } catch (error) {
+        console.error(`Error reading package.json from ${packagePath}:`, error);
+        throw error;
+    }
+}
+
+export function setPackageJson(data: Record<string, any>, customPath?: string) {
+    const packagePath = customPath || resolve('package.json');
+    try {
+        writeFileSync(packagePath, JSON.stringify(data, null, 2), 'utf-8');
     } catch (error) {
         console.error(`Error reading package.json from ${packagePath}:`, error);
         throw error;

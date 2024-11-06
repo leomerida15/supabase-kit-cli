@@ -1,3 +1,4 @@
+export const auth_schema = `
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model audit_log_entries {
@@ -203,7 +204,7 @@ model saml_relay_states {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model schema_migrations {
-    version String @id @unique @db.VarChar(14)
+    version String @id @unique @db.Text()
 
     @@schema("auth")
 }
@@ -354,3 +355,5 @@ enum one_time_token_type {
 
     @@schema("auth")
 }
+
+`;

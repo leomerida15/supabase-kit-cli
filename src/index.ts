@@ -4,16 +4,20 @@ import { Command } from 'commander';
 import { getPackageJson } from './common';
 import { InitCommand } from './commands/init';
 import { MigrateCommand } from './commands';
+import { resolve } from 'node:path';
+import { TypesCommand } from './commands/types';
 
-const pkgJson = getPackageJson('./../package.json');
+const pkgJson = getPackageJson(resolve('node_modules', '@supabase-kit', 'cli', 'package.json'));
 
 const program = new Command();
 
-program.name('supa').description('CLI to use @supabase-kit').version(pkgJson.version);
+program.name(pkgJson.name).description('CLI to use @supabase-kit').version(pkgJson.version);
 
 InitCommand(program);
 
 MigrateCommand(program);
+
+TypesCommand(program);
 
 program.parse();
 

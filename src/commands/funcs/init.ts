@@ -1,11 +1,7 @@
-import { resolve } from 'node:path';
+import { join } from 'node:path';
 import { Command } from 'commander';
-import { exec } from 'shelljs';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
-
-const execSync = (cmd: string) => {
-    return new Promise((resolve) => exec(cmd, { async: true }, resolve));
-};
+import { execSync } from 'node:child_process';
 
 const getPkm = () => {
     const pkms = {
@@ -16,7 +12,7 @@ const getPkm = () => {
     };
 
     const pkmSeartch = Object.values(pkms).find((p) => {
-        const basePath = resolve(p.file);
+        const basePath = join(p.file);
 
         return existsSync(basePath);
     });
@@ -33,19 +29,20 @@ export const InitCommand = (program: Command) => {
         .action(async () => {
             const pkm = getPkm();
 
-            await execSync('bun supabase functions new example');
-            await execSync('cd supabase/functions -- exit && deno init');
-            unlinkSync(resolve('supabase', 'functions', 'main.ts'));
-            await execSync(
+            execSync('bun supabase functions new example', { stdio: 'pipe' });
+            execSync('cd supabase/functions -- exit && deno init', { stdio: 'pipe' });
+            unlinkSync(join('supabase', 'functions', 'main.ts'));
+            execSync(
                 'cd supabase/functions -- exit && deno add npm:@rocket-kit/edge jsr:@supabase/functions-js',
+                { stdio: 'pipe' },
             );
             writeFileSync(
-                resolve('supabase', 'functions', 'example', 'index.ts'),
-                readFileSync(resolve('src', 'commands', 'funcs', 'example.txt')).toString(),
+                join('supabase', 'functions', 'example', 'index.ts'),
+                readFileSync(join('src', 'commands', 'funcs', 'example.txt')).toString(),
             );
 
-            await execSync(`${pkm.i} @rocket-kit/edge prisma @supabase/supabase-js`);
+            execSync(`${pkm.i} @rocket-kit/edge prisma @supabase/supabase-js`, { stdio: 'pipe' });
 
-            await execSync(`${pkm.i} prisma-import -D`);
+            execSync(`${pkm.i} prisma-import -D`, { stdio: 'pipe' });
         });
 };

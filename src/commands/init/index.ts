@@ -1,31 +1,34 @@
 import { Command } from 'commander';
 import { getPkm } from '../funcs/getPkm';
 import { setToml } from '../funcs/setToml';
-import { execSync } from '../funcs/execSync';
+import { exec, execSync } from 'node:child_process';
 
 export const InitCommand = (program: Command) => {
     program
         .command('init')
-        .description('Init proyect')
+        .description('Init project')
         .option('-n, --name <char>', 'name project', 'supa')
         .option(
-            '-pf --port_family  <numbers>',
+            '-pf --port_family <numbers>',
             'port family by docker container for local dev',
             '5432',
         )
-        .action(async (str, options) => {
-            const pkm = getPkm();
+        .action(async (str) => {
+            try {
+                const pkm = getPkm();
 
-            await execSync(`${pkm.i} supabase -D`);
+                exec(`${pkm.i} prisma-import supabase -D`);
+                exec(`${pkm.i} prisma @supabase/supabase-js`);
 
-            await execSync(`${pkm.pk} supabase init`);
+                // Ejecuta 'supabase init' de manera sincrónica
+                execSync(`${pkm.run} supabase init`, { stdio: 'pipe' });
 
-            setToml(str.name, str.port_family);
+                // Configura el archivo toml
+                setToml(str.name, str.port_family);
+            } catch (errorr) {
+                const err = errorr as Error;
 
-            await execSync(`${pkm.i} prisma @supabase/supabase-js`);
-
-            // await execSync("cd supabase/schemas/helpers -- mkdir auth public helpers");
-
-            // await execSync("cd supabase/schemas/helpers -- mkdir auth public helpers");
+                console.error('Error al ejecutar supabase init:', err.message);
+            }
         });
 };

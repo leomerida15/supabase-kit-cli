@@ -1,6 +1,6 @@
 {
     "name": "@supabase-kit/cli",
-    "version": "0.0.75-alpha",
+    "version": "0.1.0",
     "license": "MIT",
     "type": "module",
     "author": {
@@ -12,7 +12,7 @@
     "module": "dist/cli.esm.js",
     "typings": "dist/index.d.ts",
     "files": [
-        "dist"
+        "dist/cli.esm.js"
     ],
     "homepage": "https://github.com/leomerida15/supabase-kit-cli",
     "repository": {
@@ -27,7 +27,6 @@
         "build": "dts build",
         "postbuild": "bun add-shebang.js",
         "lint": "dts lint",
-        "prepare": "dts build",
         "size": "size-limit",
         "start": "dts watch",
         "test": "dts test",
@@ -75,7 +74,6 @@
         "typescript": "^5.1.6"
     },
     "dependencies": {
-        "commander": "^12.1.0",
-        "shelljs": "^0.8.5"
+        "commander": "^12.1.0"
     }
 }

@@ -1,3 +1,4 @@
+export const wkSpace = `
 {
     "folders": [
         {
@@ -18,3 +19,4 @@
         "deno.importMap": "./supabase/functions/deno.json",
     },
 }
+`;
