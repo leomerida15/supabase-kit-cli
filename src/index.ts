@@ -20,5 +20,3 @@ MigrateCommand(program);
 TypesCommand(program);
 
 program.parse();
-
-process.exit(0);
