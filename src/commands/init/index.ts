@@ -13,6 +13,7 @@ export const InitCommand = (program: Command) => {
             'port family by docker container for local dev',
             '5432',
         )
+        .option('-fm, --framework <react | next>', 'extra tools by framework')
         .action(async (str) => {
             try {
                 const pkm = getPkm();
@@ -25,6 +26,18 @@ export const InitCommand = (program: Command) => {
 
                 // Configura el archivo toml
                 setToml(str.name, str.port_family);
+
+                if (['react', 'next'].includes(str.framework)) {
+                    execSync(`${pkm.i}  @tanstack/react-query @supabase-kit/react`, {
+                        stdio: 'pipe',
+                    });
+
+                    if (str.framework === 'next') {
+                        execSync(`${pkm.i} @next-hooks/use-urls @supabase/ssr`, {
+                            stdio: 'pipe',
+                        });
+                    }
+                }
             } catch (errorr) {
                 const err = errorr as Error;
 
